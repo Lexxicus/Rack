@@ -1,18 +1,25 @@
 # init
 class App
   def call(env)
-    perfom_request
+    @request = Rack::Request.new(env)
+    @get_time = TimeFormat.new(@request)
     [status, headers, body]
-  end
-
-  def perfom_request
-    sleep rand(1..3)
   end
 
   private
 
   def status
-    200
+    if @request.path == '/time'
+      invalid_format
+    else
+      404
+    end
+  end
+
+  def invalid_format
+    return 200 unless @get_time.valid?
+
+    400
   end
 
   def headers
@@ -20,6 +27,8 @@ class App
   end
 
   def body
-    ["Welcome aboard!\n"]
+    return ["Page Not Found\n"] unless @request.path == '/time'
+
+    ["#{@get_time.time}\n"]
   end
 end
