@@ -20,13 +20,16 @@ class TimeFormat
     @invalid.empty?
   end
 
-  def time
+  def time_string
+    Time.now.strftime(@valid.join('-'))
+  end
+
+  def invalid_format
+    "Unknown time format #{@invalid}"
+  end
+
+  def call
     check_formats
-    if valid?
-      Time.now.strftime(@valid.join('-'))
-    else
-      "Unknown time format #{@invalid}"
-    end
   end
 
   private

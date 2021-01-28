@@ -2,33 +2,34 @@
 class App
   def call(env)
     @request = Rack::Request.new(env)
-    @get_time = TimeFormat.new(@request)
-    [status, headers, body]
+    request_time
   end
 
-  private
-
-  def status
+  def request_time
     if @request.path == '/time'
-      invalid_format
+      process_params
     else
-      404
+      response('not found', 404)
     end
   end
 
-  def invalid_format
-    return 200 unless @get_time.valid?
-
-    400
+  def response(body, status)
+    Rack::Response.new(body, status, headers)
   end
 
   def headers
     { 'Content-Type' => 'text/plain' }
   end
 
-  def body
-    return ["Page Not Found\n"] unless @request.path == '/time'
+  private
 
-    ["#{@get_time.time}\n"]
+  def process_params
+    tf = TimeFormat.new(@request)
+    tf.call
+    if tf.valid?
+      response(tf.time_string, 200)
+    else
+      response(tf.invalid_format, 400)
+    end
   end
 end
