@@ -3,18 +3,16 @@ class App
   def call(env)
     @request = Rack::Request.new(env)
     request_time
+    [@status, headers, [@body]]
   end
 
   def request_time
     if @request.path == '/time'
       process_params
     else
-      response('not found', 404)
+      @body = 'not found'
+      @status = 404
     end
-  end
-
-  def response(body, status)
-    Rack::Response.new(body, status, headers)
   end
 
   def headers
@@ -27,9 +25,11 @@ class App
     tf = TimeFormat.new(@request)
     tf.call
     if tf.valid?
-      response(tf.time_string, 200)
+      @body = tf.time_string
+      @status = 200
     else
-      response(tf.invalid_format, 400)
+      @body = tf.invalid_format
+      @status = 400
     end
   end
 end
